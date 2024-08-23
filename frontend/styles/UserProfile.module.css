@@ -1,0 +1,32 @@
+.sidebar {
+    flex: 0 0 250px;
+    background-color: #fff;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+}
+
+.profileImage {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 20px;
+}
+
+.profileInfo {
+    list-style: none;
+    padding: 0;
+    width: 100%;
+    text-align: left;
+    color: black;
+}
+
+.profileInfo li {
+    margin-top: 20px;
+    font-size: 20px;
+    color: black;
+}

@@ -1,0 +1,48 @@
+.loadingContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+}
+
+.loadingSpinner {
+    position: relative;
+    width: 80px;
+    height: 80px;
+}
+
+.circle {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    opacity: 0.6;
+    animation: bounce 2s infinite ease-in-out;
+}
+
+.circle1 {
+    background-color: #FFA500;
+    animation-delay: -0.5s;
+}
+
+.circle2 {
+    background-color: #4CAF50;
+    animation-delay: -0.3s;
+}
+
+.circle3 {
+    background-color: #2196F3;
+    animation-delay: -0.1s;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: scale(0.0); }
+    50% { transform: scale(1.0); }
+}
+
+.loadingContainer p {
+    margin-top: 20px;
+    font-size: 18px;
+    color: #666;
+}

@@ -1,0 +1,26 @@
+.section {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.section h2 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.skillsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.skillCard {
+    padding: 10px 15px;
+    background-color: #e9ecef;
+    border-radius: 5px;
+    font-size: 14px;
+    color: #495057;
+}

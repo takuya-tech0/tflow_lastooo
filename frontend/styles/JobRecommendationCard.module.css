@@ -1,0 +1,93 @@
+/* JobRecommendationCard.module.css */
+.container {
+    background-color: #f7f7f7;
+    padding: 20px;
+    border-radius: 8px;
+  }
+  
+  .title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  .jobGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+  }
+  
+  .jobCard {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  
+  .jobTitle {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+  }
+  
+  .jobId, .department {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 3px;
+  }
+  
+  .skill {
+    background-color: #f0f0f0;
+    border: 1px solid #e0e0e0;
+    border-radius: 16px;
+    padding: 4px 10px;
+    font-size: 12px;
+    color: #333;
+    display: inline-flex;
+    align-items: center;
+  }
+  
+  .skill::before {
+    content: '#';
+    margin-right: 3px;
+    color: #666;
+  }
+  
+  .detailsButton {
+    background-color: #333;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 0;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    width: 100%;
+    text-align: center;
+    margin-top: auto;
+  }
+  
+  .detailsButton:hover {
+    background-color: #555;
+  }
+  
+  .recommendButton {
+    background-color: #f0f0f0;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 20px;
+  }
+  
+  .recommendButton:hover {
+    background-color: #e0e0e0;
+  }

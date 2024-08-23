@@ -1,0 +1,32 @@
+.section {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 0px;
+    flex: 1;
+    min-width: 300px;
+}
+
+.section h2 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.radarChart {
+    width: 100%;
+    height: 300px;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+    .section {
+        min-width: 100%;
+    }
+
+    .radarChart {
+        height: 250px;
+    }
+}

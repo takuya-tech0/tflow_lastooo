@@ -1,0 +1,26 @@
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* 必要に応じて調整 */
+    font-size: 2rem;
+    color: #333; /* テキストの色 */
+  }
+  
+  .loading::before {
+    content: '';
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    margin-right: 0.5em;
+    border-radius: 50%;
+    border: 3px solid #ccc; /* ローダーの枠線の色 */
+    border-top-color: #333; /* ローダーのアニメーション部分の色 */
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }

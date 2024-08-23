@@ -1,0 +1,118 @@
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modalContent {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modalTitle {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.closeButton {
+    background-color: #333;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 20px;
+}
+
+.closeButton:hover {
+    background-color: #555;
+}
+
+.jobCard {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.jobTitle {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.jobId, .department {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 3px;
+}
+
+.skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 10px 0;
+}
+
+.skill {
+    background-color: #f0f0f0;
+    border: 1px solid #e0e0e0;
+    border-radius: 16px;
+    padding: 4px 10px;
+    font-size: 12px;
+    color: #333;
+    display: inline-flex;
+    align-items: center;
+}
+
+.skill::before {
+    content: '#';
+    margin-right: 3px;
+    color: #666;
+}
+
+.detailsButton {
+    background-color: #333;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 0;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: auto; /* ボタンを下部に固定 */
+}
+
+.similarity {
+    font-size: 14px;
+    color: #4a4a4a;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.matchingReason {
+    margin-left: 21px;
+    margin-top: 2px;
+}
+
+.sectionTitle{
+    margin-top: 15px;
+}
