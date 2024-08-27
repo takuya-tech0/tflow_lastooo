@@ -6,9 +6,13 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from auth import SECRET_KEY, ALGORITHM, authenticate_user, create_access_token
 from utils import (
-    get_all_employee_data, get_all_job_posts, prepare_recommendation_data, generate_recommendations,
-    get_employee_vector, get_all_job_post_vectors, get_top_similar_jobs,
-    get_job_details, EmployeeVectorNotFound
+    get_employee_vectors,  # get_employee_vector から変更
+    get_all_job_post_vectors,
+    get_top_similar_jobs_for_vectors,  # この関数名も更新されている可能性があります
+    get_job_details,
+    prepare_recommendation_data,
+    generate_recommendations,
+    get_all_employee_data
 )
 from database import get_db, engine
 import models
@@ -59,67 +63,57 @@ async def read_users_me(current_user: models.Employee = Depends(get_current_user
         raise HTTPException(status_code=500, detail="Error retrieving employee data")
     return employee_data
 
-# main.py の recommend_jobs エンドポイントを更新
+# main.py
 @app.post("/recommendations")
 async def recommend_jobs(current_user: models.Employee = Depends(get_current_user), db: Session = Depends(get_db)):
     try:
-        # データ取得部分
-        employee_vector = get_employee_vector(db, current_user.employee_id)
+        employee_vectors = get_employee_vectors(db, current_user.employee_id)
         job_post_vectors = get_all_job_post_vectors(db)
-        
-        if not job_post_vectors:
-            raise HTTPException(status_code=500, detail="No job vectors found")
-            
-        # パーセンテージで類似度を取得
-        top_job_ids = get_top_similar_jobs(employee_vector, job_post_vectors, return_percentage=True)
-        
-        if not top_job_ids:
-            raise HTTPException(status_code=500, detail="No top job recommendations found")
-        
-        # デバッグ用: top_job_idsの内容を確認
-        print("Top Job IDs:", top_job_ids)
-        
-        top_jobs = get_job_details(db, [job['job_id'] for job in top_job_ids])
-        
-        # デバッグ用: top_jobsの内容を確認
-        print("Top Jobs:", top_jobs)
 
-        if not top_jobs:
-            raise HTTPException(status_code=500, detail="No job details found for the recommended jobs")
-        
-        employee_data = get_all_employee_data(db, current_user)
-        
-        if employee_data is None:
-            raise HTTPException(status_code=500, detail="Error retrieving employee data")
-        
-        # データ準備
-        prepared_data = prepare_recommendation_data(employee_data, top_jobs, employee_vector)
-        
-        # デバッグ用: prepared_dataの内容を確認
-        print("Prepared Data:", prepared_data)
-        
-        # 推薦生成
-        recommendations = generate_recommendations(prepared_data)
-        
-        # デバッグ用: recommendationsの内容を確認
-        print("Recommendations:", recommendations)
-        
-        # 類似度パーセンテージと部門名、スキル名も含めて返す
-        for i, job in enumerate(top_jobs):
-            job['similarity'] = top_job_ids[i]['similarity']
-        
-        # デバッグ用: 類似度が追加された top_jobs の確認
-        print("Top Jobs with Similarity:", top_jobs)
-        
+        if not job_post_vectors:
+            raise HTTPException(status_code=404, detail="No job vectors found")
+
+        top_job_ids = get_top_similar_jobs_for_vectors(employee_vectors, job_post_vectors, return_percentage=True)
+
+        if not top_job_ids:
+            raise HTTPException(status_code=404, detail="No top job recommendations found")
+
+        recommendations = {}
+        top_jobs = {}
+        for vector_type, jobs in top_job_ids.items():
+            job_ids = [job['job_id'] for job in jobs]
+            job_details = get_job_details(db, job_ids)
+            
+            # Combine job details with similarity scores
+            combined_jobs = []
+            for job in jobs:
+                job_detail = next((detail for detail in job_details if detail['job_post_id'] == job['job_id']), None)
+                if job_detail:
+                    combined_job = {
+                        **job,
+                        'job_title': job_detail['job_title'],
+                        'department_name': job_detail['department_name'],
+                        'job_detail': job_detail['job_detail']
+                    }
+                    combined_jobs.append(combined_job)
+
+            employee_data = get_all_employee_data(db, current_user)
+
+            if employee_data is None:
+                raise HTTPException(status_code=404, detail="Error retrieving employee data")
+
+            prepared_data = prepare_recommendation_data(employee_data, combined_jobs, employee_vectors[vector_type])
+
+            recommendations[vector_type] = generate_recommendations(prepared_data, vector_type)
+
+            top_jobs[vector_type] = combined_jobs
+
         return {"recommendations": recommendations, "top_jobs": top_jobs}
-    
-    except EmployeeVectorNotFound:
-        print(f"Employee vector not found for employee ID: {current_user.employee_id}")
-        raise HTTPException(status_code=404, detail="Employee vector not found")
-    
+
     except Exception as e:
         print(f"Error in job recommendation: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error in job recommendation: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error in job recommendation: {str(e)}")   
+
 
 if __name__ == "__main__":
     import uvicorn

@@ -1,5 +1,5 @@
 # models.py
-from sqlalchemy import Column, Integer, String, ForeignKey, Date  # Date を追加
+from sqlalchemy import Column, Integer, String, ForeignKey, Date, Text
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -18,10 +18,16 @@ class Employee(Base):
     spi = relationship('Spi', back_populates='employee', uselist=False)
     evaluations = relationship('EvaluationHistory', back_populates='employee')
     departments = relationship('DepartmentMember', back_populates='employee')
-    
+
     vector = relationship("EmployeeVector", back_populates="employee", uselist=False)
     
-    
+    # 新しく追加したフィールド
+    career_info_detail = Column(Text)
+    career_info_vector = Column(Text)  # JSONとして格納
+    personality_detail = Column(Text)
+    personality_vector = Column(Text)  # JSONとして格納
+
+# 以下の既存のクラスは変更なし
 class EmployeeVector(Base):
     __tablename__ = "employee_vectors"
 
