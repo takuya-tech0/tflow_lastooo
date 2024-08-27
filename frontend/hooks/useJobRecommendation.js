@@ -19,11 +19,12 @@ export default function useJobRecommendation(setRecommendations, setTopJobs, set
 
             const { recommendations, top_jobs } = response.data;
 
+            // Log to verify the data structure of top_jobs
             console.log("Raw recommendations:", recommendations);
-            console.log("Raw top_jobs:", top_jobs);
-
-            setRecommendations(recommendations || '');
-            setTopJobs(Array.isArray(top_jobs) ? top_jobs : []);
+            console.log("Raw top_jobs:", top_jobs);  // Check if this logs correctly
+            
+            setRecommendations(recommendations || {});
+            setTopJobs(top_jobs || {});
             
         } catch (error) {
             console.error('Failed to fetch job recommendations:', error);
