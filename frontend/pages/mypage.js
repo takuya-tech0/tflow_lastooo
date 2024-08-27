@@ -1,11 +1,10 @@
-import { useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/router';
 import { motion, AnimatePresence } from 'framer-motion';
 import Layout from '../components/Layout';
 import UserProfile from '../components/UserProfile';
 import PsychographicChart from '../components/PsychographicChart';
 import CareerInfo from '../components/CareerInfo';
-import SkillsInfo from '../components/SkillsInfo';
 import LoadingSpinner from '../components/LoadingSpinner';
 import useUserData from '../hooks/useUserData';
 import styles from '../styles/MyPage.module.css';
@@ -38,13 +37,19 @@ export default function MyPage() {
               exit={{ opacity: 0 }}
               className={styles.contentWrapper}
             >
-              <UserProfile userData={userData} />
+              <div className={styles.profileSection}>
+                <UserProfile userData={userData} />
+              </div>
               <main className={styles.mainContent}>
                 <div className={styles.sectionContainer}>
-                  <PsychographicChart spiData={userData.spi} />
-                  <CareerInfo evaluations={userData.evaluations} />
+                  <section className={styles.section}>
+                    <PsychographicChart spiData={userData.spi} />
+                  </section>
+                  <section className={styles.section}>
+                    <h2>性格情報</h2>
+                    <CareerInfo personality_detail={userData.employee_info.personality_detail} />
+                  </section>
                 </div>
-                <SkillsInfo skills={userData.skills} />
                 <div className={styles.buttons}>
                   <motion.button
                     whileHover={{ scale: 1.05 }}
