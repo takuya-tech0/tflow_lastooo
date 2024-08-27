@@ -13,13 +13,8 @@ const JobCard = ({ job }) => {
         <>
             <div className={styles.jobCard}>
                 <p className={styles.department}>{job.department_name}部</p>
-                <h3 className={styles.jobTitle}>{job.job_title}</h3>
-                <p className={styles.similarity}>マッチ度: {job.similarity}%</p>
-                <div className={styles.skills}>
-                    {job.skills && job.skills.map((skill, index) => (
-                        <span key={index} className={styles.skill}>{skill}</span>
-                    ))}
-                </div>
+                <h3 className={styles.jobTitle}>{job.job_title || `求人ID: ${job.job_id}`}</h3>
+                <p className={styles.similarity}>マッチ度: {job.similarity.toFixed(2)}%</p>
                 <button onClick={openModal} className={styles.detailsButton}>
                     詳細を見る
                 </button>
@@ -41,13 +36,18 @@ const JobCard = ({ job }) => {
                             animate={{ y: 0, opacity: 1 }}
                             exit={{ y: 50, opacity: 0 }}
                         >
-                            <h2 className={styles.modalTitle}>{job.job_title}</h2>
-                            <h4 className={styles.sectionTitle}>職務内容:</h4>
-                            <p className={styles.jobDetail}>{job.job_detail}</p>
+                            <h2 className={styles.modalTitle}>{job.job_title || `求人ID: ${job.job_id}`}</h2>
+                            <h3 className={styles.modalDepartment}>{job.department_name}部</h3>
+                            {job.job_detail && (
+                                <>
+                                    <h4 className={styles.sectionTitle}>職務内容:</h4>
+                                    <p className={styles.jobDetail}>{job.job_detail}</p>
+                                </>
+                            )}
                             <h4 className={styles.sectionTitle}>マッチング理由:</h4>
                             <ul className={styles.matchingReasons}>
                                 {job.matching_reasons && job.matching_reasons.map((reason, index) => (
-                                    <li key={index} className={styles.matchingReason}>{reason.replace(/^・\s*/, '')}</li>
+                                    <li key={index} className={styles.matchingReason}>{reason}</li>
                                 ))}
                             </ul>
                             <button onClick={closeModal} className={styles.closeButton}>

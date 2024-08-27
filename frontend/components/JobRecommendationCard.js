@@ -13,8 +13,8 @@ const JobRecommendationCard = ({
     error,
     setError
 }) => {
-    const [topJobs, setTopJobs] = useState([]);
-    const [recommendations, setRecommendations] = useState('');
+    const [topJobs, setTopJobs] = useState({});
+    const [recommendations, setRecommendations] = useState({});
     const { handleJobRecommendation } = useJobRecommendation(setRecommendations, setTopJobs, setLoading, setError);
 
     useEffect(() => {
@@ -23,72 +23,58 @@ const JobRecommendationCard = ({
 
     useEffect(() => {
         console.log("Raw recommendations:", recommendations);
-    }, [recommendations]);
+        console.log("Raw top jobs:", topJobs);
+    }, [recommendations, topJobs]);
 
     const parseRecommendations = (rawRecommendations) => {
         console.log("Parsing recommendations:", rawRecommendations);
         
         if (typeof rawRecommendations === 'string' && rawRecommendations.trim() !== '') {
-            const parsedRecommendations = rawRecommendations.split(/\d+\.\s推奨求人：/).filter(Boolean);
+            const parsedRecommendations = rawRecommendations.split(/(?=\d+\.\s*推奨求人：)/).filter(Boolean);
             console.log("Split recommendations:", parsedRecommendations);
             
-            return parsedRecommendations.map((recommendation, index) => {
-                console.log(`Processing recommendation ${index + 1}:`, recommendation);
-                
-                const parts = recommendation.split(/\n\s*マッチング理由：\n/);
-                console.log(`Parts for recommendation ${index + 1}:`, parts);
-                
-                const titleAndId = parts[0];
-                const rest = parts.slice(1);
-                
-                console.log(`Title and ID for recommendation ${index + 1}:`, titleAndId);
-                console.log(`Rest for recommendation ${index + 1}:`, rest);
-                
-                const match = titleAndId.match(/(.+)（求人ID:\s*(\d+)）/);
+            return parsedRecommendations.map((recommendation) => {
+                const parts = recommendation.split(/\n\s*マッチング理由：\s*\n/);
+                const titleAndId = parts[0].trim();
+                const matchingReasons = parts[1] ? parts[1].split(/\n\s*・/).filter(Boolean).map(reason => reason.trim()) : [];
+    
+                const match = titleAndId.match(/\d+\.\s*推奨求人：求人ID:\s*(\d+)/);
                 if (!match) {
-                    console.error(`Failed to parse job title and ID for recommendation ${index + 1}:`, titleAndId);
+                    console.error('Failed to parse job ID for recommendation:', titleAndId);
                     return null;
                 }
                 
-                const [, jobTitle, jobId] = match;
-                console.log(`Parsed job title: "${jobTitle}", job ID: ${jobId}`);
-                
-                let matchingReasons = [];
-                if (rest.length > 0 && rest[0]) {
-                    matchingReasons = rest[0].split(/\n\s*・/).filter(Boolean).map(reason => reason.trim());
-                    console.log(`Matching reasons for recommendation ${index + 1}:`, matchingReasons);
-                } else {
-                    console.warn(`No matching reasons found for recommendation ${index + 1}`);
-                }
+                const [, jobId] = match;
                 
                 return {
                     job_post_id: parseInt(jobId),
-                    job_title: jobTitle,
                     matching_reasons: matchingReasons
                 };
             }).filter(Boolean);
-        } else if (Array.isArray(rawRecommendations)) {
-            console.log("rawRecommendations is already an array:", rawRecommendations);
-            return rawRecommendations;
         }
         
         console.warn("Invalid rawRecommendations format:", rawRecommendations);
         return [];
     };
 
-    const parsedRecommendations = parseRecommendations(recommendations);
-    console.log("Parsed recommendations:", parsedRecommendations);
+    const combineJobsWithRecommendations = (jobs, recs) => {
+        if (!jobs || !recs) return [];
+        return jobs.map(job => {
+            const recommendation = recs.find(r => r.job_post_id === job.job_id);
+            return {
+                ...job,
+                job_post_id: job.job_id,
+                matching_reasons: recommendation ? recommendation.matching_reasons : []
+            };
+        });
+    };
 
-    const combinedJobs = topJobs.map(job => {
-        const recommendation = parsedRecommendations.find(r => r.job_post_id === job.job_post_id);
-        const combinedJob = {
-            ...job,
-            matching_reasons: recommendation ? recommendation.matching_reasons : [],
-            similarity: job.similarity // similarityを追加
-        };
-        console.log(`Job ${job.job_post_id} matching reasons:`, combinedJob.matching_reasons);
-        return combinedJob;
-    });
+    const careerInfoJobs = recommendations.career_info_vector && topJobs.career_info_vector
+        ? combineJobsWithRecommendations(topJobs.career_info_vector, parseRecommendations(recommendations.career_info_vector))
+        : [];
+    const personalityJobs = recommendations.personality_vector && topJobs.personality_vector
+        ? combineJobsWithRecommendations(topJobs.personality_vector, parseRecommendations(recommendations.personality_vector))
+        : [];
 
     return (
         <motion.div
@@ -108,15 +94,22 @@ const JobRecommendationCard = ({
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                     >
-                        {combinedJobs.length > 0 ? (
+                        <div className={styles.recommendationSection}>
+                            <h4>キャリア情報に基づく推奨</h4>
                             <div className={styles.jobGrid}>
-                                {combinedJobs.map((job) => (
-                                    <JobCard key={job.job_post_id} job={job} />
+                                {careerInfoJobs.map((job, index) => (
+                                    <JobCard key={`career-${job.job_post_id || index}`} job={job} />
                                 ))}
                             </div>
-                        ) : (
-                            <p className={styles.noJobs}>{userData.employee_info.name}さんに最適な求人を提案します</p>
-                        )}
+                        </div>
+                        <div className={styles.recommendationSection}>
+                            <h4>性格情報に基づく推奨</h4>
+                            <div className={styles.jobGrid}>
+                                {personalityJobs.map((job, index) => (
+                                    <JobCard key={`personality-${job.job_post_id || index}`} job={job} />
+                                ))}
+                            </div>
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>
