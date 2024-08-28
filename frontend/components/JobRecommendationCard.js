@@ -8,31 +8,21 @@ import styles from '../styles/JobRecommendationCard.module.css';
 
 const JobRecommendationCard = ({
     userData,
-    loading,
-    setLoading,
-    error,
-    setError
+    recommendationType
 }) => {
     const [topJobs, setTopJobs] = useState({});
     const [recommendations, setRecommendations] = useState({});
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
     const { handleJobRecommendation } = useJobRecommendation(setRecommendations, setTopJobs, setLoading, setError);
 
     useEffect(() => {
-        handleJobRecommendation();
-    }, []);
-
-    useEffect(() => {
-        console.log("Raw recommendations:", recommendations);
-        console.log("Raw top jobs:", topJobs);
-    }, [recommendations, topJobs]);
+        handleJobRecommendation(recommendationType);
+    }, [recommendationType]);
 
     const parseRecommendations = (rawRecommendations) => {
-        console.log("Parsing recommendations:", rawRecommendations);
-        
         if (typeof rawRecommendations === 'string' && rawRecommendations.trim() !== '') {
             const parsedRecommendations = rawRecommendations.split(/(?=\d+\.\s*推奨求人：)/).filter(Boolean);
-            console.log("Split recommendations:", parsedRecommendations);
-            
             return parsedRecommendations.map((recommendation) => {
                 const parts = recommendation.split(/\n\s*マッチング理由：\s*\n/);
                 const titleAndId = parts[0].trim();
@@ -52,8 +42,6 @@ const JobRecommendationCard = ({
                 };
             }).filter(Boolean);
         }
-        
-        console.warn("Invalid rawRecommendations format:", rawRecommendations);
         return [];
     };
 
@@ -69,11 +57,9 @@ const JobRecommendationCard = ({
         });
     };
 
-    const careerInfoJobs = recommendations.career_info_vector && topJobs.career_info_vector
-        ? combineJobsWithRecommendations(topJobs.career_info_vector, parseRecommendations(recommendations.career_info_vector))
-        : [];
-    const personalityJobs = recommendations.personality_vector && topJobs.personality_vector
-        ? combineJobsWithRecommendations(topJobs.personality_vector, parseRecommendations(recommendations.personality_vector))
+    const vectorType = recommendationType === 'personality' ? 'personality_vector' : 'career_info_vector';
+    const jobsToRender = topJobs[vectorType] && recommendations[vectorType]
+        ? combineJobsWithRecommendations(topJobs[vectorType], parseRecommendations(recommendations[vectorType]))
         : [];
 
     return (
@@ -95,18 +81,10 @@ const JobRecommendationCard = ({
                         exit={{ opacity: 0 }}
                     >
                         <div className={styles.recommendationSection}>
-                            <h4>キャリア情報に基づく推奨</h4>
+                            <h4>{recommendationType === 'personality' ? '性格傾向' : 'スキル'}に基づく推奨</h4>
                             <div className={styles.jobGrid}>
-                                {careerInfoJobs.map((job, index) => (
-                                    <JobCard key={`career-${job.job_post_id || index}`} job={job} />
-                                ))}
-                            </div>
-                        </div>
-                        <div className={styles.recommendationSection}>
-                            <h4>性格情報に基づく推奨</h4>
-                            <div className={styles.jobGrid}>
-                                {personalityJobs.map((job, index) => (
-                                    <JobCard key={`personality-${job.job_post_id || index}`} job={job} />
+                                {jobsToRender.map((job, index) => (
+                                    <JobCard key={`${recommendationType}-${job.job_post_id || index}`} job={job} />
                                 ))}
                             </div>
                         </div>
@@ -127,7 +105,7 @@ const JobRecommendationCard = ({
             <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={handleJobRecommendation}
+                onClick={() => handleJobRecommendation(recommendationType)}
                 disabled={loading}
                 className={styles.recommendButton}
             >
