@@ -2,14 +2,14 @@
 import axios from 'axios';
 
 export default function useJobRecommendation(setRecommendations, setTopJobs, setLoading, setError) {
-    const handleJobRecommendation = async () => {
-        console.log("handleJobRecommendation called");
+    const handleJobRecommendation = async (vectorType) => {
+        console.log("handleJobRecommendation called with vectorType:", vectorType);
         setLoading(true);
         setError('');
         try {
             const token = localStorage.getItem('token');
             console.log("Token retrieved:", token ? "Token exists" : "No token");
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/recommendations`, null, {
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/recommendations`, { vector_type: vectorType }, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -19,9 +19,8 @@ export default function useJobRecommendation(setRecommendations, setTopJobs, set
 
             const { recommendations, top_jobs } = response.data;
 
-            // Log to verify the data structure of top_jobs
             console.log("Raw recommendations:", recommendations);
-            console.log("Raw top_jobs:", top_jobs);  // Check if this logs correctly
+            console.log("Raw top_jobs:", top_jobs);
             
             setRecommendations(recommendations || {});
             setTopJobs(top_jobs || {});
