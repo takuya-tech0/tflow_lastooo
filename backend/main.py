@@ -1,14 +1,15 @@
 # main.py
 from fastapi import FastAPI, HTTPException, status, Depends
+from fastapi.params import Body
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from auth import SECRET_KEY, ALGORITHM, authenticate_user, create_access_token
 from utils import (
-    get_employee_vectors,  # get_employee_vector から変更
+    get_employee_vectors,
     get_all_job_post_vectors,
-    get_top_similar_jobs_for_vectors,  # この関数名も更新されている可能性があります
+    get_top_similar_jobs_for_vectors,
     get_job_details,
     prepare_recommendation_data,
     generate_recommendations,
@@ -63,28 +64,36 @@ async def read_users_me(current_user: models.Employee = Depends(get_current_user
         raise HTTPException(status_code=500, detail="Error retrieving employee data")
     return employee_data
 
-# main.py
+# main. py
 @app.post("/recommendations")
-async def recommend_jobs(current_user: models.Employee = Depends(get_current_user), db: Session = Depends(get_db)):
+async def recommend_jobs(
+    current_user: models.Employee = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    vector_type: str = Body(..., embed=True)
+):
     try:
         employee_vectors = get_employee_vectors(db, current_user.employee_id)
         job_post_vectors = get_all_job_post_vectors(db)
 
-        if not job_post_vectors:
-            raise HTTPException(status_code=404, detail="No job vectors found")
+        if vector_type not in ["personality", "career"]:
+            raise HTTPException(status_code=400, detail="Invalid vector_type")
 
-        top_job_ids = get_top_similar_jobs_for_vectors(employee_vectors, job_post_vectors, return_percentage=True)
+        if vector_type == "personality":
+            vector_to_use = {"personality_vector": employee_vectors["personality_vector"]}
+        else:  # career
+            vector_to_use = {"career_info_vector": employee_vectors["career_info_vector"]}
+
+        top_job_ids = get_top_similar_jobs_for_vectors(vector_to_use, job_post_vectors, return_percentage=True)
 
         if not top_job_ids:
             raise HTTPException(status_code=404, detail="No top job recommendations found")
 
         recommendations = {}
         top_jobs = {}
-        for vector_type, jobs in top_job_ids.items():
+        for vec_type, jobs in top_job_ids.items():
             job_ids = [job['job_id'] for job in jobs]
             job_details = get_job_details(db, job_ids)
             
-            # Combine job details with similarity scores
             combined_jobs = []
             for job in jobs:
                 job_detail = next((detail for detail in job_details if detail['job_post_id'] == job['job_id']), None)
@@ -102,17 +111,16 @@ async def recommend_jobs(current_user: models.Employee = Depends(get_current_use
             if employee_data is None:
                 raise HTTPException(status_code=404, detail="Error retrieving employee data")
 
-            prepared_data = prepare_recommendation_data(employee_data, combined_jobs, employee_vectors[vector_type])
+            prepared_data = prepare_recommendation_data(employee_data, combined_jobs, vector_to_use[vec_type])
 
-            recommendations[vector_type] = generate_recommendations(prepared_data, vector_type)
-
-            top_jobs[vector_type] = combined_jobs
+            recommendations[vec_type] = generate_recommendations(prepared_data, vec_type)
+            top_jobs[vec_type] = combined_jobs
 
         return {"recommendations": recommendations, "top_jobs": top_jobs}
 
     except Exception as e:
         print(f"Error in job recommendation: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error in job recommendation: {str(e)}")   
+        raise HTTPException(status_code=500, detail=f"Error in job recommendation: {str(e)}")
 
 
 if __name__ == "__main__":
