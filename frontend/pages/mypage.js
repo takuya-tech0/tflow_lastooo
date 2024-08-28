@@ -13,6 +13,14 @@ export default function MyPage() {
   const router = useRouter();
   const { userData, loading, error } = useUserData();
 
+  const handleRecommendationClick = (type) => {
+    if (type === 'personality') {
+      router.push('/job_recommendation_personality');
+    } else if (type === 'career') {
+      router.push('/job_recommendation_skill');
+    }
+  };
+
   return (
     <Layout>
       <div className={styles.mypageContainer}>
@@ -61,9 +69,16 @@ export default function MyPage() {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => router.push('/job_recommendation')}
+                    onClick={() => handleRecommendationClick('personality')}
                   >
-                    求人推薦システム
+                    性格傾向によるマッチング
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleRecommendationClick('career')}
+                  >
+                    スキルによるマッチング
                   </motion.button>
                 </div>
               </main>
