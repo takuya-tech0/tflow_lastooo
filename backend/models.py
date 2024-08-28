@@ -6,7 +6,7 @@ from database import Base
 class Employee(Base):
     __tablename__ = 'employee'
     employee_id = Column(Integer, primary_key=True)
-    name = Column(String)
+    employee_name = Column(String)
     password = Column(String)
     birthdate = Column(Date)
     gender = Column(String)
@@ -85,20 +85,19 @@ class EvaluationHistory(Base):
     evaluation_comment = Column(String)
     employee = relationship('Employee', back_populates='evaluations')
 
-class DepartmentMember(Base):
-    __tablename__ = 'department_member'
-    department_member_id = Column(Integer, primary_key=True)
-    department_id = Column(Integer, ForeignKey('department.department_id'))
-    employee_id = Column(Integer, ForeignKey('employee.employee_id'))
-    employee = relationship('Employee', back_populates='departments')
-    department = relationship('Department', back_populates='members')
-
 class Department(Base):
     __tablename__ = 'department'
     department_id = Column(Integer, primary_key=True)
     department_name = Column(String)
     department_detail = Column(String)
     members = relationship('DepartmentMember', back_populates='department')
+
+class DepartmentMember(Base):
+    __tablename__ = 'department_member'
+    employee_id = Column(Integer, ForeignKey('employee.employee_id'), primary_key=True)
+    department_id = Column(Integer, ForeignKey('department.department_id'), primary_key=True)
+    employee = relationship('Employee', back_populates='departments')
+    department = relationship('Department', back_populates='members')
 
 class JobPost(Base):
     __tablename__ = 'job_post'

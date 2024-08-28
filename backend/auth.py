@@ -20,7 +20,7 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
 
 def authenticate_user(db: Session, username: str, password: str):
     print(f"Attempting to authenticate user: {username}")
-    user = db.query(Employee).filter(Employee.name == username).first()
+    user = db.query(Employee).filter(Employee.employee_name == username).first()
     print(f"User found: {user}")
     if not user:
         print("User not found")

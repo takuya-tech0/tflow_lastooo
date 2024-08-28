@@ -37,7 +37,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         username: str = payload.get("sub")
         if username is None:
             raise HTTPException(status_code=400, detail="Invalid authentication credentials")
-        user = db.query(models.Employee).filter(models.Employee.name == username).first()
+        user = db.query(models.Employee).filter(models.Employee.employee_name == username).first()
         if user is None:
             raise HTTPException(status_code=404, detail="User not found")
         return user
@@ -53,7 +53,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
             detail="ユーザー名またはパスワードが正しくありません",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token = create_access_token(data={"sub": user.name})
+    access_token = create_access_token(data={"sub": user.employee_name})
     return {"access_token": access_token, "token_type": "bearer"}
 
 @app.get("/users/me")

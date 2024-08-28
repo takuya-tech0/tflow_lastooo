@@ -122,7 +122,7 @@ def get_job_details(db: Session, job_ids: List[int]) -> List[Dict[str, Any]]:
 def prepare_recommendation_data(employee_data: Dict[str, Any], top_jobs: List[Dict[str, Any]], employee_vector: List[float]) -> Dict[str, Any]:
     return {
         "employee_info": {
-            "name": employee_data['employee_info']['name'],
+            "name": employee_data['employee_info']['name'],  # ここを変更
             "skills": [skill['skill_name'] for skill in employee_data['skills']],
             "academic_background": employee_data['employee_info']['academic_background'],
             "recruitment_type": employee_data['employee_info']['recruitment_type']
@@ -234,14 +234,14 @@ def get_all_employee_data(session: Session, employee: Employee) -> Optional[Dict
         return {
             "employee_info": {
                 "id": employee.employee_id,
-                "name": employee.name,
+                "name": employee.employee_name,  # ここを変更
                 "birthdate": str(employee.birthdate),
                 "gender": employee.gender,
                 "academic_background": employee.academic_background,
                 "hire_date": str(employee.hire_date),
                 "recruitment_type": employee.recruitment_type,
-                "career_info_detail": employee.career_info_detail, # 追加
-                "personality_detail": employee.personality_detail  # 追加
+                "career_info_detail": employee.career_info_detail,
+                "personality_detail": employee.personality_detail
             },
             "grades": [{"grade_id": g.grade, "grade_name": g.grade_info.grade_name} for g in employee.grades],
             "skills": [{"skill_id": s.skill_id, "skill_name": s.skill.skill_name, "skill_category": s.skill.skill_category} for s in employee.skills],
